@@ -22,5 +22,22 @@ class HTMLNode:
         return " ".join(html_props)
 
     def __repr__(self):
-        return f"HTMLNode(tag={self.tag}, children={self.children}, props={self.props})"
+        return f"HTMLNode(tag={self.tag}, value={self.value}, children={self.children}, props={self.props})"
 
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value=None, props=None):
+        super(LeafNode, self).__init__(tag=tag, value=value, props=props)
+
+    def to_html(self):
+        if not self.value:
+            raise ValueError("value must be set")
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+
+def main():
+    my_leaf = LeafNode(tag="p", value="Sample Code", props={"style": "\"font-size: 14px;\""})
+    print(LeafNode("a", "Click me!", {"href": "https://www.google.com"}).to_html())
+    print(my_leaf.to_html())
+    return
+
+if __name__ == '__main__':
+    main()
