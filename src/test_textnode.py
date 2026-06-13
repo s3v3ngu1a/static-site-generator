@@ -2,6 +2,7 @@ import unittest
 from textnode import TextNode
 from textnode import TextType
 from textnode import text_node_to_html_node
+from textnode import split_nodes_delimiter
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -46,6 +47,27 @@ class TestTextNode(unittest.TestCase):
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "img")
         self.assertEqual(html_node.value, "")
+
+    def test_split_nodes_delimiter_bold(self):
+        node = TextNode("This is **bold**", TextType.TEXT_PLAIN)
+        new_nodes = split_nodes_delimiter([node], "**", TextType.TEXT_BOLD)
+        self.assertEqual(new_nodes[0].text, "This is ")
+        self.assertEqual(new_nodes[1].text, "bold")
+        self.assertEqual(new_nodes[1].text_type, TextType.TEXT_BOLD)
+
+    def test_split_nodes_delimiter_code(self):
+        node = TextNode("This is `code`", TextType.TEXT_PLAIN)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.TEXT_CODE)
+        self.assertEqual(new_nodes[0].text, "This is ")
+        self.assertEqual(new_nodes[1].text, "code")
+        self.assertEqual(new_nodes[1].text_type, TextType.TEXT_CODE)
+
+    def test_split_nodes_delimiter_italic(self):
+        node = TextNode("This is _italics_", TextType.TEXT_PLAIN)
+        new_nodes = split_nodes_delimiter([node], "_", TextType.TEXT_ITALIC)
+        self.assertEqual(new_nodes[0].text, "This is ")
+        self.assertEqual(new_nodes[1].text, "italics")
+        self.assertEqual(new_nodes[1].text_type, TextType.TEXT_ITALIC)
 
 if __name__ == "__main__":
     unittest.main()
