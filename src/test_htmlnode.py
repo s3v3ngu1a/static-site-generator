@@ -39,15 +39,15 @@ class TestParentNode(unittest.TestCase):
             "<div><span><b>grandchild</b></span></div>",
         )
 
-#    def test_no_children_raise_value_error(self):
-#        self.assertRaises()
-#
-#    def test_value_not_set_raise_value_error(self):
-#        self.assertRaises()
-#
-#    def test_value_not_set_raise_value_error(self):
-#        self.assertRaises()
-#
+    def test_no_children_raise_value_error(self):
+        parent_node = ParentNode("div", {"class": "heading-1"})
+        self.assertRaises(ValueError, msg="children must be set")
+
+    def test_value_not_set_raise_value_error(self):
+        child_node = LeafNode("span", "child", {"width": "50%"})
+        parent_node = ParentNode([child_node], {"class": "heading-1"})
+        self.assertRaises(ValueError, msg="value must be set")
+
     def test_parent_props_correct_render(self):
         child_node = LeafNode("span", "child", {"width": "50%"})
         parent_node = ParentNode("div", [child_node], {"class": "heading-1"})
