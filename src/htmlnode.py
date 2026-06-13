@@ -24,6 +24,17 @@ class HTMLNode:
     def __repr__(self):
         return f"HTMLNode(tag={self.tag}, value={self.value}, children={self.children}, props={self.props})"
 
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super(ParentNode, self).__init__(tag=tag, value=None, children=children, props=props)
+
+    def to_html(self):
+        if not self.tag:
+            raise ValueError("value must be set")
+        if not self.children:
+            raise ValueError("children must be set")
+        return f"<{self.tag}{self.props_to_html()}>{''.join([child.to_html() for child in self.children])}</{self.tag}>"
+
 class LeafNode(HTMLNode):
     def __init__(self, tag, value=None, props=None):
         super(LeafNode, self).__init__(tag=tag, value=value, props=props)
@@ -43,6 +54,17 @@ def main():
     my_leaf = LeafNode(tag="p", value="Sample Code", props={"style": "font-size: 14px;"})
     print(LeafNode("a", "Click me!", {"href": "https://www.google.com"}).to_html())
     print(my_leaf.to_html())
+    node = ParentNode(
+        "p",
+        [
+            LeafNode("b", "Bold text"),
+            LeafNode(None, "Normal text"),
+            LeafNode("i", "italic text"),
+            LeafNode(None, "Normal text"),
+        ],
+    )
+
+    print(node.to_html())
     return
 
 if __name__ == '__main__':

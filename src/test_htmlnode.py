@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_create_empty_node(self):
@@ -23,6 +23,38 @@ class TestLeafNode(unittest.TestCase):
     def test_leaf_to_html_url(self):
         node = LeafNode("a", "Click me, i'm secure!", {"href": "https://www.google.com"})
         self.assertEqual(node.to_html(), '<a href="https://www.google.com">Click me, i\'m secure!</a>')
+
+class TestParentNode(unittest.TestCase):
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+
+#    def test_no_children_raise_value_error(self):
+#        self.assertRaises()
+#
+#    def test_value_not_set_raise_value_error(self):
+#        self.assertRaises()
+#
+#    def test_value_not_set_raise_value_error(self):
+#        self.assertRaises()
+#
+    def test_parent_props_correct_render(self):
+        child_node = LeafNode("span", "child", {"width": "50%"})
+        parent_node = ParentNode("div", [child_node], {"class": "heading-1"})
+        self.assertEqual(
+                parent_node.to_html(),
+                "<div class=\"heading-1\"><span width=\"50%\">child</span></div>"
+                )
 
 if __name__ == "__main__":
     unittest.main()
