@@ -20,7 +20,7 @@ class TextNode:
         eq_text = self.text == another.text
         eq_type = self.text_type == another.text_type
         eq_url = self.url == another.url
-        eq_alt = self.url == another.alt
+        eq_alt = self.alt == another.alt
         return eq_text and eq_type and eq_url and eq_alt
     def __repr__(self):
         return f"TextNode(text=\"{self.text}\", text_type={self.text_type.value}, url={self.url}, alt={self.alt})"
@@ -47,14 +47,22 @@ def split_nodes_delimiter(old_nodes: list[TextNode],
                           text_type: TextType) -> list[TextNode]:
     parsed_nodes = []
     for node in old_nodes:
-        content = node.text
-        splitter = content.split(delimiter)
-        for idx, split in enumerate(splitter):
-            if idx % 2 != 0:
-                new_node = TextNode(text=split, text_type=text_type)
-            else:
-                new_node = TextNode(text=split, text_type=TextType.TEXT_PLAIN)
-            parsed_nodes.append(new_node)
+        if node.text_type == TextType.TEXT_PLAIN:
+            content = node.text
+            splitter = content.split(delimiter)
+            if len(splitter) % 2 == 0:
+                raise ValueError(f"Unmatched delimiter: {content}")
+
+            for idx, split in enumerate(splitter):
+                if len(split) == 0:
+                    continue
+                if idx % 2 != 0:
+                    new_node = TextNode(text=split, text_type=text_type)
+                else:
+                    new_node = TextNode(text=split, text_type=TextType.TEXT_PLAIN)
+                parsed_nodes.append(new_node)
+        else:
+            parsed_nodes.append(node)
     return parsed_nodes
 
 def main():
