@@ -1,5 +1,7 @@
 import unittest
-from textnode import TextNode, TextType
+from textnode import TextNode
+from textnode import TextType
+from textnode import text_node_to_html_node
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -20,6 +22,30 @@ class TestTextNode(unittest.TestCase):
     def test_not_url_not_url_type(self):
         node = TextNode("This is a text node", TextType.TEXT_BOLD)
         self.assertTrue((node.url is None) and (node.text_type != TextType.TEXT_URL))
+
+    def test_node_text_creation(self):
+        node = TextNode("This is a text node", TextType.TEXT_PLAIN)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
+
+    def test_text_code_creation(self):
+        node = TextNode("This is a code node", TextType.TEXT_CODE)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "code")
+        self.assertEqual(html_node.value, "This is a code node")
+
+    def test_text_url_creation(self):
+        node = TextNode("Click me!", TextType.TEXT_URL, "https://google.com")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "a")
+        self.assertEqual(html_node.value, "Click me!")
+
+    def test_text_image_creation(self):
+        node = TextNode("", TextType.TEXT_IMAGE, "https://supersecurecdn.com/img/1", "monkey face")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "img")
+        self.assertEqual(html_node.value, "")
 
 if __name__ == "__main__":
     unittest.main()
