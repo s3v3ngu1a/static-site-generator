@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 from htmlnode import LeafNode
 
@@ -65,10 +66,23 @@ def split_nodes_delimiter(old_nodes: list[TextNode],
             parsed_nodes.append(node)
     return parsed_nodes
 
+def extract_markdown_links(text):
+    reg = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
+    matches = re.findall(reg, text)
+    return matches
+
+def extract_markdown_images(text):
+    reg = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
+    matches = re.findall(reg, text)
+    return matches
+
 def main():
-    node = TextNode("This is **text** with a **bold block** **word**", TextType.TEXT_PLAIN)
-    new_nodes = split_nodes_delimiter([node], "**", TextType.TEXT_BOLD)
-    print(new_nodes)
+    import re
+    text_link = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+    print(extract_markdown_links(text_link))
+    text_img = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obiwan](https://i.imgur.com/fJRm4Vk.jpeg)"
+    print(extract_markdown_images(text_img))
+    # [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
 
 if __name__ == '__main__':
     main()

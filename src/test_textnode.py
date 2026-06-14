@@ -3,6 +3,7 @@ from textnode import TextNode
 from textnode import TextType
 from textnode import text_node_to_html_node
 from textnode import split_nodes_delimiter
+from textnode import extract_markdown_images
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -68,6 +69,12 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(new_nodes[0].text, "This is ")
         self.assertEqual(new_nodes[1].text, "italics")
         self.assertEqual(new_nodes[1].text_type, TextType.TEXT_ITALIC)
+
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+                "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+                )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
 if __name__ == "__main__":
     unittest.main()
