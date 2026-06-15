@@ -40,7 +40,6 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     elif text_node.text_type == TextType.TEXT_IMAGE:
         return LeafNode(tag="img", value="", props={"src": f"{text_node.url}", "alt": f"{text_node.alt}"})
     else:
-        # This is weird why would be an objecti with a text type not defined at enum?
         raise ValueError("Unknown text_type")
 
 def split_nodes_delimiter(old_nodes: list[TextNode],
@@ -76,13 +75,72 @@ def extract_markdown_images(text):
     matches = re.findall(reg, text)
     return matches
 
+def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
+    parsed_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT_PLAIN:
+            parsed_nodes.append(node)
+            continue
+        full_text = None
+        images_extraction_results = extract_markdown_images(node.text)
+        if not images_extraction_results:
+            parsed_nodes.append(node)
+        else:
+            full_text = node.text
+            for alt_text, url in images_extraction_results:
+                img_split = full_text.split(f"![{alt_text}]({url})", 1)
+                trailing_text = img_split[0]
+                if trailing_text:
+                    node_text = TextNode(text=trailing_text, text_type=TextType.TEXT_PLAIN)
+                    parsed_nodes.append(node_text)
+                node_img = TextNode(text=alt_text, url=url, text_type=TextType.TEXT_IMAGE)
+                full_text = img_split[1]
+                parsed_nodes.append(node_img)
+        if full_text:
+            node_text = TextNode(text=full_text, text_type=TextType.TEXT_PLAIN)
+            parsed_nodes.append(node_text)
+    return parsed_nodes
+
+
+def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
+    parsed_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT_PLAIN:
+            parsed_nodes.append(node)
+            continue
+        links_extraction_results = extract_markdown_links(node.text)
+        full_text = None
+        if not links_extraction_results:
+            parsed_nodes.append(node)
+        else:
+            full_text = node.text
+            for link_text, url in links_extraction_results:
+                link_split = full_text.split(f"[{link_text}]({url})", 1)
+                trailing_text = link_split[0]
+                if trailing_text:
+                    node_text = TextNode(text=trailing_text, text_type=TextType.TEXT_PLAIN)
+                    parsed_nodes.append(node_text)
+                node_link = TextNode(text=link_text, url=url, text_type=TextType.TEXT_URL)
+                full_text = link_split[1]
+                parsed_nodes.append(node_link)
+        if full_text:
+            node_text = TextNode(text=full_text, text_type=TextType.TEXT_PLAIN)
+            parsed_nodes.append(node_text)
+    return parsed_nodes
+
+def text_to_textnodes(text):
+    result_nodes = []
+    root = [TextNode(text=text, text_type=TextType.TEXT_PLAIN)]
+    bold_extraction_result = split_nodes_delimiter(root, '**', TextType.TEXT_BOLD)
+    italic_extraction_result = split_nodes_delimiter(bold_extraction_result, '_', TextType.TEXT_ITALIC)
+    code_extraction_result = split_nodes_delimiter(italic_extraction_result, '`', TextType.TEXT_CODE)
+    link_extraction_result = split_nodes_link(code_extraction_result)
+    image_extraction_result = split_nodes_image(link_extraction_result)
+    result_nodes.extend(image_extraction_result)
+    return result_nodes
+
 def main():
-    import re
-    text_link = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
-    print(extract_markdown_links(text_link))
-    text_img = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obiwan](https://i.imgur.com/fJRm4Vk.jpeg)"
-    print(extract_markdown_images(text_img))
-    # [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
+    print("Hello World")
 
 if __name__ == '__main__':
     main()
