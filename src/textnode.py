@@ -139,8 +139,28 @@ def text_to_textnodes(text):
     result_nodes.extend(image_extraction_result)
     return result_nodes
 
+def markdown_to_blocks(markdown):
+    parts = list(
+            filter(lambda x: len(x) > 0,
+                   [p.strip() for p in markdown.split('\n\n')]
+                   )
+            )
+    return parts
+
 def main():
-    print("Hello World")
+    md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+
+"""
+    markdown_to_blocks(md)
+
 
 if __name__ == '__main__':
     main()
