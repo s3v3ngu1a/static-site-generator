@@ -128,6 +128,7 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
             parsed_nodes.append(node_text)
     return parsed_nodes
 
+# TODO review possible bug missing extend with link extraction
 def text_to_textnodes(text):
     result_nodes = []
     root = [TextNode(text=text, text_type=TextType.TEXT_PLAIN)]
