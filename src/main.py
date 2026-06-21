@@ -1,6 +1,6 @@
 import os
 import shutil
-from textnode import TextNode
+from mdtohtml import markdown_to_html_node
 
 def _rec_copy_files(src, dst):
     if os.path.exists(src):
@@ -19,11 +19,46 @@ def copy_files(src, dst):
     os.mkdir(dst)
     _rec_copy_files(src, dst)
 
+def extract_title(markdown):
+    stripped_content = markdown.strip()
+    if len(stripped_content) > 1:
+        title = stripped_content.split('\n')[0].strip()
+        if not title.startswith("# "):
+            raise ValueError("there is no header on this markdown text")
+        return title.replace("# ", "").strip()
+    raise ValueError("there is no markdown content")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    with open(from_path) as f_in:
+        content_markdown = f_in.read()
+
+    with open(template_path) as f_in:
+        content_template = f_in.read()
+
+    html_content = markdown_to_html_node(content_markdown).to_html()
+    page_title = extract_title(content_markdown)
+    content_template = content_template.replace("{{ Title }}", page_title)
+    content_template = content_template.replace("{{ Content }}", html_content)
+
+    dst_base = os.path.dirname(dest_path)
+    if not os.path.exists(dst_base):
+        makedirs(dst_base, exist_ok=True)
+
+    with open(dest_path, 'w') as f_out:
+        f_out.write(content_template)
 
 def main():
-    public_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, "public"))
-    static_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, "static"))
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+    public_path = os.path.join(base_dir, "public")
+    static_path = os.path.join(base_dir, "static")
     copy_files(static_path, public_path)
+
+    generate_page(
+            os.path.join(base_dir, "content", "index.md"),
+            os.path.join(base_dir, "template.html"),
+            os.path.join(base_dir, "public/index.html")
+            )
 
 if __name__ == "__main__":
     main()

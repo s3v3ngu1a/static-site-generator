@@ -37,7 +37,9 @@ def _build_quote(text):
 def _build_list(text="", ordered=False):
     if text == "":
         return None
-    list_lines = text.replace("- ","").split("\n")
+    pattern_ordered = re.compile(r"^\d+\.\s", flags=re.MULTILINE)
+    text_raw = pattern_ordered.sub("", text)
+    list_lines = text_raw.replace("- ","").split("\n")
     html_nodes = []
     for line in list_lines:
         text_nodes = text_to_textnodes(line)
