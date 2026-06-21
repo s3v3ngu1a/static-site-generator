@@ -48,17 +48,29 @@ def generate_page(from_path, template_path, dest_path):
     with open(dest_path, 'w') as f_out:
         f_out.write(content_template)
 
+# TODO Implement many templates or dynamic templates
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if os.path.exists(dir_path_content):
+        for item in os.listdir(dir_path_content):
+            gen_src = os.path.join(dir_path_content, item)
+            gen_dst = os.path.join(dest_dir_path, item)
+            if os.path.isfile(gen_src):
+                gen_dst = gen_dst.replace('.md', '.html')
+                generate_page(gen_src, template_path, gen_dst) 
+            elif os.path.isdir(gen_src):
+                os.mkdir(gen_dst)
+                generate_pages_recursive(gen_src, template_path, gen_dst)
+
 def main():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
     public_path = os.path.join(base_dir, "public")
     static_path = os.path.join(base_dir, "static")
     copy_files(static_path, public_path)
 
-    generate_page(
-            os.path.join(base_dir, "content", "index.md"),
-            os.path.join(base_dir, "template.html"),
-            os.path.join(base_dir, "public/index.html")
-            )
+    generate_pages_recursive(os.path.join(base_dir, "content"),
+                             os.path.join(base_dir, "template.html"),
+                             os.path.join(base_dir, "public")
+                             )
 
 if __name__ == "__main__":
     main()
